@@ -1,0 +1,37 @@
+# Run all jobs on the latest Ubuntu runner
+runs-on: ubuntu-latest
+
+# --- Matrix Strategy (3 variants) ---
+strategy:
+  matrix:
+    node-version: ['18', '20', '21']
+    
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Set up Node.js ${{ matrix.node-version }}
+    uses: actions/setup-node@v4
+    with:
+      node-version: ${{ matrix.node-version }}
+
+  # --- Required Step Identifier ---
+  - name: matrix-3c56197 - Install dependencies and confirm environment
+    run: |
+      echo "Starting build process for Node version ${{ matrix.node-version }}"
+      npm install
+
+  - name: Generate unique build artifact
+    run: |
+      # Create a mock build file containing unique configuration details
+      ARTIFACT_CONTENT="Build configuration for Node.js ${{ matrix.node-version }} on runner ${{ runner.os }} at $(date)"
+      echo "$ARTIFACT_CONTENT" > build-output-${{ matrix.node-version }}.txt
+      cat build-output-${{ matrix.node-version }}.txt # Display content for verification
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      # Required artifact naming convention: build-3c56197-<variant>
+      name: build-3c56197-node-${{ matrix.node-version }}
+      path: build-output-${{ matrix.node-version }}.txt
+      retention-days: 7
